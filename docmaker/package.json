@@ -1,0 +1,21 @@
+{
+  "name": "docx-batch-web",
+  "version": "1.0.0",
+  "description": "App web para gerar DOCX em lote a partir de template e planilha",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "docxtemplater": "^3.43.0",
+    "express": "^4.19.2",
+    "jszip": "^3.10.1",
+    "libreoffice-convert": "^1.5.1",
+    "mammoth": "^1.11.0",
+    "multer": "^1.4.5-lts.1",
+    "nodemailer": "^6.10.1",
+    "pizzip": "^3.1.7",
+    "puppeteer": "^23.11.1",
+    "xlsx": "^0.18.5"
+  }
+}

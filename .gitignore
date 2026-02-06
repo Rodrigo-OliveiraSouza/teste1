@@ -1,0 +1,9 @@
+docmaker/__pycache__/
+docmaker/parcerista/
+docmaker/saida_pdf/
+node_modules/
+dist/
+.env
+.env.*
+docmaker/node_modules/
+docmaker/saida_docx/

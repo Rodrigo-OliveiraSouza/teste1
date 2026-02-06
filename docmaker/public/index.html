@@ -1,0 +1,1262 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Gerador DOCX (web)</title>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@400;600;700&family=Space+Grotesk:wght@500;600&display=swap");
+
+      :root {
+        color-scheme: light;
+        --bg: #f3ede2;
+        --bg-2: #e7dcc8;
+        --paper: #fffaf0;
+        --ink: #2a2723;
+        --muted: #6a6156;
+        --accent: #b05b3a;
+        --accent-strong: #8c3f26;
+        --accent-soft: rgba(176, 91, 58, 0.14);
+        --border: #e1d6c5;
+        --focus: #2e6a5a;
+        --shadow: 0 20px 60px rgba(44, 36, 24, 0.18);
+        --radius: 16px;
+      }
+
+      * { box-sizing: border-box; }
+
+      body {
+        margin: 0;
+        font-family: "Source Serif 4", "Iowan Old Style", "Palatino Linotype", serif;
+        color: var(--ink);
+        line-height: 1.5;
+        font-size: 18px;
+        background:
+          radial-gradient(circle at 12% 18%, rgba(176, 91, 58, 0.12), transparent 55%),
+          radial-gradient(circle at 88% 10%, rgba(46, 106, 90, 0.1), transparent 60%),
+          linear-gradient(120deg, var(--bg), var(--bg-2));
+        min-height: 100vh;
+      }
+
+      .app-main {
+        max-width: 1350px;
+        margin: 46px auto 78px;
+        padding: 0 20px 20px;
+        font-size: 23px;
+      }
+
+      .hero {
+        display: flex;
+        gap: 24px;
+        align-items: flex-end;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        padding: 10px 6px 26px;
+        animation: fade-in 0.6s ease-out both;
+      }
+
+      .eyebrow {
+        font-family: "Space Grotesk", "Gill Sans", "Trebuchet MS", sans-serif;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        font-size: 16px;
+        color: var(--muted);
+        margin: 0 0 8px;
+      }
+
+      h1 {
+        font-family: "Space Grotesk", "Gill Sans", "Trebuchet MS", sans-serif;
+        font-size: clamp(36px, 5vw, 54px);
+        margin: 0 0 10px;
+        line-height: 1.15;
+      }
+
+      .subhead {
+        margin: 0;
+        color: var(--muted);
+        font-size: 20px;
+        max-width: 800px;
+      }
+
+      .ad-dock {
+        position: fixed;
+        top: 96px;
+        width: clamp(240px, 17vw, 300px);
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        align-items: stretch;
+        z-index: 2;
+      }
+
+      #ad-dock-left { left: 18px; }
+      #ad-dock-right { right: 18px; }
+
+      .ad-card {
+        background: radial-gradient(circle at 20% 20%, #fff4e6, #f2dcc3);
+        border: 1px solid #ead8c2;
+        border-radius: 18px;
+        padding: 20px 20px 18px;
+        box-shadow:
+          0 16px 30px rgba(44, 36, 24, 0.18),
+          inset 0 1px 0 rgba(255, 255, 255, 0.6);
+        transform-style: preserve-3d;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        cursor: pointer;
+      }
+
+      .ad-card:hover {
+        transform: translateY(-2px) rotateX(1deg);
+        box-shadow:
+          0 20px 34px rgba(44, 36, 24, 0.22),
+          inset 0 1px 0 rgba(255, 255, 255, 0.7);
+      }
+
+      .ad-tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-family: "Space Grotesk", "Gill Sans", "Trebuchet MS", sans-serif;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        font-size: 10px;
+        color: var(--muted);
+      }
+
+      .ad-title {
+        font-family: "Space Grotesk", "Gill Sans", "Trebuchet MS", sans-serif;
+        font-size: 18px;
+        margin: 6px 0 6px;
+        color: var(--ink);
+      }
+
+      .ad-body {
+        font-size: 16px;
+        color: var(--muted);
+        line-height: 1.4;
+      }
+
+      .ad-cta {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin-top: 10px;
+        padding: 8px 12px;
+        border-radius: 999px;
+        font-size: 13px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        background: var(--accent-strong);
+        color: #fff;
+      }
+
+      .ad-inline {
+        margin: 18px 0;
+        padding: 20px 22px;
+        border-radius: 14px;
+        border: 1px dashed var(--border);
+        background: #fff5e8;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+      }
+
+      .ad-inline .ad-title {
+        margin-top: 4px;
+      }
+
+      .ad-inline .ad-cta {
+        background: transparent;
+        color: var(--accent-strong);
+        border: 1px solid var(--accent-strong);
+      }
+
+      body.overlay-active .ad-inline {
+        visibility: hidden;
+      }
+
+      .overlay {
+        position: fixed;
+        inset: 0;
+        display: grid;
+        grid-template-columns: minmax(220px, 260px) minmax(0, 860px) minmax(220px, 260px);
+        gap: 16px;
+        align-items: center;
+        justify-items: stretch;
+        padding: 12px 8px;
+        background: rgba(32, 27, 21, 0.45);
+        backdrop-filter: blur(6px);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.2s ease;
+        z-index: 50;
+      }
+
+      .overlay.is-visible {
+        opacity: 1;
+        pointer-events: auto;
+      }
+
+      .overlay-center {
+        grid-column: 2;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+      }
+
+      .overlay-side {
+        width: 100%;
+        max-width: 260px;
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+        align-self: stretch;
+        justify-content: center;
+      }
+
+      .overlay-side-left {
+        grid-column: 1;
+        justify-self: start;
+        align-self: center;
+      }
+
+      .overlay-side-right {
+        grid-column: 3;
+        justify-self: end;
+        align-self: center;
+      }
+
+      .overlay-card {
+        width: min(820px, 92vw);
+        border-radius: 20px;
+        border: 1px solid var(--border);
+        background: var(--paper);
+        box-shadow: 0 24px 60px rgba(44, 36, 24, 0.25);
+        padding: 22px 24px;
+      }
+
+      .overlay-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 16px;
+      }
+
+      .overlay-title {
+        font-family: "Space Grotesk", "Gill Sans", "Trebuchet MS", sans-serif;
+        font-size: 20px;
+        margin: 0 0 6px;
+        color: var(--ink);
+      }
+
+      .overlay-text {
+        margin: 0;
+        color: var(--muted);
+        font-size: 14px;
+      }
+
+      .overlay-progress {
+        margin-top: 12px;
+      }
+
+      .progress-track {
+        height: 10px;
+        border-radius: 999px;
+        background: #ead9c6;
+        overflow: hidden;
+        border: 1px solid var(--border);
+      }
+
+      .progress-fill {
+        height: 100%;
+        width: 0%;
+        background: linear-gradient(90deg, var(--accent), var(--accent-strong));
+        transition: width 0.2s ease;
+      }
+
+      .progress-meta {
+        margin-top: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--muted);
+      }
+
+      .progress-state {
+        margin-top: 8px;
+        font-size: 13px;
+        color: var(--muted);
+      }
+
+      .overlay-close {
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        border: 1px solid var(--border);
+        background: #fff;
+        color: var(--muted);
+        font-size: 18px;
+        line-height: 1;
+        cursor: pointer;
+      }
+
+      .overlay-close:hover {
+        color: var(--ink);
+        border-color: var(--accent-strong);
+      }
+
+      .mini-game {
+        margin-top: 16px;
+      }
+
+      .mini-game-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-size: 12px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--muted);
+        margin-bottom: 8px;
+      }
+
+      #mini-game-area {
+        position: relative;
+        height: 190px;
+        border-radius: 14px;
+        border: 1px solid var(--border);
+        background: linear-gradient(120deg, #fef7ec, #f3e2cc);
+        overflow: hidden;
+      }
+
+      #mini-game-target {
+        position: absolute;
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        border: 2px solid rgba(255, 255, 255, 0.8);
+        background: radial-gradient(circle at 30% 30%, #ffe4c2, #e08656);
+        box-shadow: 0 10px 16px rgba(44, 36, 24, 0.25);
+        cursor: pointer;
+      }
+
+      #mini-game-target:active {
+        transform: scale(0.92);
+      }
+
+      .overlay-float-ad {
+        border-radius: 14px;
+        border: 1px dashed var(--border);
+        background: #fff3e3;
+        padding: 12px 12px 10px;
+        min-height: 90px;
+        box-shadow: 0 12px 20px rgba(44, 36, 24, 0.14);
+        animation: float-ad 4s ease-in-out infinite;
+      }
+
+      .overlay-float-ad:nth-child(2) {
+        animation-delay: 0.8s;
+      }
+
+      @keyframes float-ad {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-6px); }
+      }
+
+
+      fieldset {
+        margin: 24px 0;
+        padding: 24px;
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        background: var(--paper);
+        box-shadow: var(--shadow);
+        position: relative;
+        overflow: hidden;
+        animation: rise 0.6s ease-out both;
+      }
+
+      fieldset::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(140deg, rgba(255, 255, 255, 0.75), transparent 55%);
+        pointer-events: none;
+        z-index: 0;
+      }
+
+      fieldset > * {
+        position: relative;
+        z-index: 1;
+      }
+
+      fieldset:nth-of-type(1) { animation-delay: 0.05s; }
+      fieldset:nth-of-type(2) { animation-delay: 0.15s; }
+      fieldset:nth-of-type(3) { animation-delay: 0.25s; }
+
+      legend {
+        font-family: "Space Grotesk", "Gill Sans", "Trebuchet MS", sans-serif;
+        font-weight: 600;
+        padding: 6px 14px;
+        border-radius: 999px;
+        background: #f1e4d2;
+        color: var(--accent-strong);
+        letter-spacing: 0.06em;
+        font-size: 16px;
+      }
+
+      label {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        margin-bottom: 13px;
+        color: var(--muted);
+        font-size: 18px;
+        min-width: 0;
+      }
+
+      .row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 18px;
+        align-items: end;
+        margin-bottom: 13px;
+      }
+
+      .check {
+        flex-direction: row;
+        align-items: center;
+        gap: 13px;
+        font-size: 17px;
+      }
+
+      select,
+      input[type="text"],
+      input[type="password"],
+      input[type="file"],
+      textarea {
+        padding: 13px 16px;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        background: #fff;
+        font-size: 18px;
+        font-family: "Source Serif 4", "Iowan Old Style", "Palatino Linotype", serif;
+        color: var(--ink);
+        width: 100%;
+        min-width: 0;
+      }
+
+      textarea {
+        min-height: 156px;
+        resize: vertical;
+        width: 100%;
+      }
+
+      input:focus,
+      select:focus,
+      textarea:focus,
+      button:focus {
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(46, 106, 90, 0.2);
+        border-color: var(--focus);
+      }
+
+      table {
+        border-collapse: collapse;
+        width: 100%;
+        margin-top: 16px;
+        background: #fff;
+        border-radius: 12px;
+        overflow: hidden;
+        border: 1px solid var(--border);
+      }
+
+      th, td {
+        padding: 13px 16px;
+        text-align: left;
+        border-bottom: 1px solid var(--border);
+        font-size: 18px;
+      }
+
+      th {
+        background: #f4e9da;
+        font-family: "Space Grotesk", "Gill Sans", "Trebuchet MS", sans-serif;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        font-size: 14px;
+        color: var(--muted);
+      }
+
+      tbody tr:nth-child(even) {
+        background: #fbf6ee;
+      }
+
+      button {
+        padding: 10px 16px;
+        border-radius: 12px;
+        border: 1px solid transparent;
+        background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+        color: #fff;
+        cursor: pointer;
+        font-family: "Space Grotesk", "Gill Sans", "Trebuchet MS", sans-serif;
+        font-weight: 600;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+      }
+
+      .app-main button {
+        padding: 13px 21px;
+      }
+
+      button:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 12px 20px rgba(140, 63, 38, 0.2);
+      }
+
+      #mapping-table button {
+        padding: 8px 12px;
+        font-size: 15px;
+        background: transparent;
+        color: var(--accent-strong);
+        border-color: var(--border);
+        box-shadow: none;
+      }
+
+      #mapping-table button:hover {
+        background: var(--accent-soft);
+        box-shadow: none;
+      }
+
+      .secondary {
+        background: transparent;
+        color: var(--accent-strong);
+        border-color: var(--accent-strong);
+      }
+
+      #log {
+        margin: 24px 0;
+        padding: 24px;
+        border-radius: var(--radius);
+        border: 1px solid var(--border);
+        background: var(--paper);
+        color: var(--muted);
+        white-space: pre-wrap;
+        box-shadow: var(--shadow);
+        height: 180px;
+        min-height: 180px;
+        max-height: 180px;
+        overflow: auto;
+      }
+
+      .hint {
+        margin-top: 4px;
+        color: var(--muted);
+        font-size: 16px;
+      }
+
+      #smtp-config,
+      #outlook-config {
+        border: 1px dashed var(--border);
+        padding: 16px;
+        margin-top: 13px;
+        border-radius: 12px;
+        background: #fcf6ec;
+      }
+
+      code {
+        font-family: "Space Grotesk", "Gill Sans", "Trebuchet MS", sans-serif;
+        font-size: 17px;
+        background: #f1e4d2;
+        padding: 1px 6px;
+        border-radius: 6px;
+      }
+
+      @keyframes rise {
+        from { opacity: 0; transform: translateY(12px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+
+      @keyframes fade-in {
+        from { opacity: 0; transform: translateY(6px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+
+      @media (min-width: 1200px) {
+        .app-main { padding: 0 clamp(240px, 18vw, 320px) 20px; }
+      }
+
+      @media (max-width: 1199px) {
+        .ad-dock { display: none; }
+        .app-main { padding: 0 20px 20px; }
+      }
+
+      @media (max-width: 1100px) {
+        .overlay {
+          grid-template-columns: 1fr;
+          align-items: start;
+          overflow-y: auto;
+        }
+
+        .overlay-center,
+        .overlay-side-left,
+        .overlay-side-right {
+          grid-column: auto;
+        }
+
+        .overlay-side {
+          flex-direction: row;
+          flex-wrap: wrap;
+          justify-content: center;
+        }
+      }
+
+      @media (max-width: 720px) {
+        .app-main { margin: 31px auto 52px; }
+        fieldset { padding: 20px; }
+        .app-main button { width: 100%; }
+        .ad-inline { flex-direction: column; align-items: flex-start; }
+        .ad-inline .ad-cta { align-self: flex-start; }
+        #mini-game-area { height: 160px; }
+        .overlay-float-ad { flex: 1 1 160px; }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .ad-card { transition: none; }
+        .overlay { transition: none; }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="app-main">
+      <header class="hero">
+        <div>
+          <p class="eyebrow">Automação de documentos</p>
+          <h1>Gerador DOCX em lote (web)</h1>
+          <p class="subhead">No template .docx, crie cada campo usando <code>{{nome_do_campo}}</code>. Assim o campo vira uma variável que você liga a uma coluna do Excel. Cada linha da planilha gera um DOCX e um PDF.</p>
+        </div>
+      </header>
+
+      <fieldset>
+        <legend>Arquivos</legend>
+        <label>Template DOCX: <input type="file" id="template" accept=".docx" title="Escolha o arquivo .docx modelo com campos {{campo}}. Ex: {{nome}}, {{cargo}}." /></label>
+        <label>Planilha (Excel/CSV): <input type="file" id="excel" accept=".xlsx,.xls,.csv" title="Escolha a planilha com os dados. Cada linha vira um documento." /></label>
+        <button id="inspect" title="Clique para ler os arquivos e liberar as listas de campos e colunas">Carregar / Inspecionar</button>
+      </fieldset>
+
+      <fieldset>
+        <legend>Mapeamento</legend>
+        <div class="row">
+          <label>Placeholder:
+            <select id="ph-select" title="Campo do template que será preenchido (ex: {{nome}})"></select>
+          </label>
+          <label>Coluna:
+            <select id="col-select" title="Coluna da planilha usada para preencher este campo"></select>
+          </label>
+          <label>Texto antes:
+            <input type="text" id="prefix-text" placeholder="Ex: Dr " title="Opcional. Texto fixo antes do valor (ex: Dr )" />
+          </label>
+          <label>Grupo (lista):
+            <input type="text" id="group-text" placeholder="Ex: profs" title="Opcional. Use o mesmo nome para campos que formam uma lista. O sistema junta os valores e ajusta pontuação (vírgulas e 'e') conforme a quantidade." />
+          </label>
+          <button id="add-mapping" title="Grava este par campo+coluna na tabela abaixo">Adicionar</button>
+        </div>
+        <table id="mapping-table">
+          <thead><tr><th>Placeholder</th><th>Coluna</th><th>Texto antes</th><th>Grupo</th><th>Ações</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </fieldset>
+
+      <fieldset>
+        <legend>Saída</legend>
+        <label>Placeholder para nome (primary):
+          <select id="primary-placeholder" title="Campo usado no nome dos arquivos gerados (vira {primary})"></select>
+        </label>
+        <label>Coluna de email (opcional):
+          <select id="email-column" title="Coluna com emails dos destinatários. Deixe vazio se não vai enviar email"></select>
+        </label>
+        <label>Assunto do email (opcional):
+          <input type="text" id="email-subject" placeholder="Assunto" title="Assunto do email (só se for enviar)" />
+        </label>
+        <label>Mensagem do email (opcional):</label>
+        <textarea id="email-message" rows="4" placeholder="Texto do email" title="Texto do email enviado para cada pessoa"></textarea>
+        <label>Modo de envio:
+          <select id="email-mode" title="Escolha SMTP (servidor) ou Outlook instalado no Windows">
+            <option value="smtp">SMTP</option>
+            <option value="outlook">Outlook (Windows)</option>
+          </select>
+        </label>
+        <div id="smtp-config">
+          <label>SMTP host:
+            <input type="text" id="smtp-host" placeholder="smtp.gmail.com" title="Endereço do servidor SMTP (ex: smtp.gmail.com)" />
+          </label>
+          <label>SMTP porta:
+            <input type="text" id="smtp-port" placeholder="587" title="Porta do servidor SMTP (geralmente 587 ou 465)" />
+          </label>
+          <label>SMTP usuário:
+            <input type="text" id="smtp-user" title="Usuário/login da conta de email" />
+          </label>
+          <label>SMTP senha:
+            <input type="password" id="smtp-pass" title="Senha da conta ou senha de app (recomendado)" />
+          </label>
+          <label>Remetente (from):
+            <input type="text" id="smtp-from" placeholder="Seu Nome <email@dominio>" title="Nome e email que aparecem como remetente" />
+          </label>
+          <label class="check"><input type="checkbox" id="smtp-secure" title="Marque se o servidor usa SSL na porta 465" /> SSL/465</label>
+          <div class="hint">No Gmail/Outlook, use senha de app.</div>
+        </div>
+        <div id="outlook-config">
+          <label>Email remetente (Outlook):
+            <input type="text" id="outlook-from" placeholder="seuemail@dominio.com" title="Conta do Outlook usada para envio" />
+          </label>
+          <div class="hint">Deixe vazio para usar a conta padrão do Outlook.</div>
+        </div>
+        <div class="hint">Outlook usa o perfil configurado no Windows.</div>
+        <label>Nome do arquivo (template): <input type="text" id="name-template" value="output_{index}_{primary}.docx" title="Modelo do nome do arquivo. Use {index} e {primary}" /></label>
+        <div class="row">
+          <button id="generate" title="Gera DOCX e PDF e baixa os ZIPs">Gerar ZIPs (DOCX e PDF)</button>
+          <button id="send-only" class="secondary" title="Envia emails com PDF (sem ZIP)">Enviar emails (PDF)</button>
+        </div>
+      </fieldset>
+
+      <div id="log" title="Aqui aparecem mensagens de status e erros"></div>
+    </main>
+
+    <aside id="ad-dock-left" class="ad-dock" aria-label="Publicidade lateral esquerda">
+      <div class="ad-card">
+        <div class="ad-tag">Publicidade</div>
+        <div class="ad-title">Plano Pro</div>
+        <div class="ad-body">Geração em lote, envio automático e relatórios claros.</div>
+        <div class="ad-cta">Ver planos</div>
+      </div>
+      <div class="ad-card">
+        <div class="ad-tag">Publicidade</div>
+        <div class="ad-title">Templates prontos</div>
+        <div class="ad-body">Modelos profissionais para contratos e comunicados.</div>
+        <div class="ad-cta">Explorar</div>
+      </div>
+      <div class="ad-card">
+        <div class="ad-tag">Publicidade</div>
+        <div class="ad-title">Envio agendado</div>
+        <div class="ad-body">Programe disparos de documentos com antecedencia.</div>
+        <div class="ad-cta">Agendar</div>
+      </div>
+    </aside>
+    <aside id="ad-dock-right" class="ad-dock" aria-label="Publicidade lateral direita">
+      <div class="ad-card">
+        <div class="ad-tag">Publicidade</div>
+        <div class="ad-title">Assinatura digital</div>
+        <div class="ad-body">Assine e envie documentos com validade juridica.</div>
+        <div class="ad-cta">Saiba mais</div>
+      </div>
+      <div class="ad-card">
+        <div class="ad-tag">Publicidade</div>
+        <div class="ad-title">Backup seguro</div>
+        <div class="ad-body">Guarde seus arquivos com criptografia e versionamento.</div>
+        <div class="ad-cta">Conhecer</div>
+      </div>
+      <div class="ad-card">
+        <div class="ad-tag">Publicidade</div>
+        <div class="ad-title">Gestao de equipes</div>
+        <div class="ad-body">Permissões e aprovação em um painel simples.</div>
+        <div class="ad-cta">Descobrir</div>
+      </div>
+    </aside>
+
+    <div id="generation-overlay" class="overlay" aria-hidden="true">
+      <div class="overlay-center">
+        <div class="overlay-card" role="status" aria-live="polite">
+          <div class="overlay-header">
+            <div>
+              <div class="overlay-title" id="overlay-title">Gerando PDF e DOCX...</div>
+              <p class="overlay-text" id="overlay-text">Aguarde um momento. Enquanto isso, jogue e marque pontos.</p>
+            </div>
+            <button id="overlay-close" class="overlay-close" type="button" aria-label="Fechar mini game">X</button>
+          </div>
+          <div class="overlay-progress" aria-live="polite">
+            <div class="progress-track">
+              <div class="progress-fill" id="progress-fill"></div>
+            </div>
+            <div class="progress-meta">
+              <span id="progress-label">0%</span>
+              <span id="progress-count">0/0</span>
+            </div>
+            <div class="progress-state" id="progress-state">Preparando...</div>
+          </div>
+          <div class="mini-game">
+            <div class="mini-game-header">
+              <span>Jogo rápido: clique na bolinha</span>
+              <span>Pontos: <strong id="mini-game-score">0</strong></span>
+            </div>
+            <div id="mini-game-area">
+              <button id="mini-game-target" type="button" aria-label="Alvo do jogo"></button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="overlay-side overlay-side-left" aria-label="Publicidade lateral esquerda">
+        <div class="overlay-float-ad">
+          <div class="ad-tag">Publicidade</div>
+          <div class="ad-title">Assinatura rápida</div>
+          <div class="ad-body">Envie e assine documentos sem sair do navegador.</div>
+        </div>
+        <div class="overlay-float-ad">
+          <div class="ad-tag">Publicidade</div>
+          <div class="ad-title">Envio inteligente</div>
+          <div class="ad-body">Dispare documentos para varias pessoas em minutos.</div>
+        </div>
+      </div>
+      <div class="overlay-side overlay-side-right" aria-label="Publicidade lateral direita">
+        <div class="overlay-float-ad">
+          <div class="ad-tag">Publicidade</div>
+          <div class="ad-title">Backup seguro</div>
+          <div class="ad-body">Seus PDFs protegidos com criptografia e acesso rápido.</div>
+        </div>
+        <div class="overlay-float-ad">
+          <div class="ad-tag">Publicidade</div>
+          <div class="ad-title">Templates premium</div>
+          <div class="ad-body">Modelos prontos para contratos e comunicados.</div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const phSelect = document.getElementById("ph-select");
+      const colSelect = document.getElementById("col-select");
+      const prefixInput = document.getElementById("prefix-text");
+      const groupInput = document.getElementById("group-text");
+      const emailModeSelect = document.getElementById("email-mode");
+      const smtpConfigEl = document.getElementById("smtp-config");
+      const outlookConfigEl = document.getElementById("outlook-config");
+      const mappingTableBody = document.querySelector("#mapping-table tbody");
+      const logEl = document.getElementById("log");
+      const overlayEl = document.getElementById("generation-overlay");
+      const overlayCloseEl = document.getElementById("overlay-close");
+      const overlayTitleEl = document.getElementById("overlay-title");
+      const overlayTextEl = document.getElementById("overlay-text");
+      const progressFillEl = document.getElementById("progress-fill");
+      const progressLabelEl = document.getElementById("progress-label");
+      const progressCountEl = document.getElementById("progress-count");
+      const progressStateEl = document.getElementById("progress-state");
+      const gameAreaEl = document.getElementById("mini-game-area");
+      const gameTargetEl = document.getElementById("mini-game-target");
+      const gameScoreEl = document.getElementById("mini-game-score");
+      let placeholders = [];
+      let columns = [];
+      let mapping = [];
+      let gameTimer = null;
+      let gameScore = 0;
+      let activeJob = null;
+      let pollTimer = null;
+
+      function log(msg, isError = false) {
+        logEl.textContent = msg;
+        logEl.style.color = isError ? "red" : "#444";
+      }
+
+      function setOverlayContent(title, text) {
+        if (overlayTitleEl) overlayTitleEl.textContent = title || "";
+        if (overlayTextEl) overlayTextEl.textContent = text || "";
+      }
+
+      function setProgress(current, total) {
+        if (!progressFillEl || !progressLabelEl || !progressCountEl) return;
+        const safeTotal = Number(total) || 0;
+        const safeCurrent = Math.max(0, Number(current) || 0);
+        const percent = safeTotal > 0 ? Math.round((safeCurrent / safeTotal) * 100) : 0;
+        progressFillEl.style.width = `${percent}%`;
+        progressLabelEl.textContent = `${percent}%`;
+        progressCountEl.textContent = safeTotal ? `${safeCurrent}/${safeTotal}` : "--";
+      }
+
+      function setProgressState(text) {
+        if (progressStateEl) progressStateEl.textContent = text || "";
+      }
+
+      function clearJobPolling() {
+        if (pollTimer) clearInterval(pollTimer);
+        pollTimer = null;
+      }
+
+      function updateProgressFromStatus(status) {
+        const total = Number(status.total) || 0;
+        const current = Number(status.current) || 0;
+        setProgress(current, total);
+        let message = status.message || "";
+        if (status.status === "paused") {
+          message = "Pausado. Volte para continuar.";
+        }
+        if (status.emailTotal) {
+          const sent = Number(status.emailSent) || 0;
+          const emailTotal = Number(status.emailTotal) || 0;
+          const suffix = `Emails: ${sent}/${emailTotal}.`;
+          message = message ? `${message} ${suffix}` : suffix;
+        }
+        if (!message) message = "Processando...";
+        setProgressState(message);
+      }
+
+      async function pollActiveJob() {
+        if (!activeJob) return;
+        try {
+          const res = await fetch(`/jobs/${activeJob.id}`);
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok) {
+            log(data.error || "Falha ao acompanhar o progresso.", true);
+            return;
+          }
+          updateProgressFromStatus(data);
+          if (data.status === "done") {
+            await finishActiveJob();
+          } else if (data.status === "error") {
+            log(data.error || "Falha no processamento.", true);
+            clearJobPolling();
+            activeJob = null;
+            hideGenerationOverlay();
+          }
+        } catch (err) {
+          log("Falha ao acompanhar o progresso.", true);
+        }
+      }
+
+      async function finishActiveJob() {
+        if (!activeJob) return;
+        clearJobPolling();
+        try {
+          const res = await fetch(`/jobs/${activeJob.id}/result`);
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok) {
+            log(data.error || "Falha ao obter resultado.", true);
+          } else if (activeJob.type === "generate") {
+            const docxBlob = b64toBlob(data.docxZip, "application/zip");
+            downloadBlob(docxBlob, "docxs.zip");
+            if (data.pdfZip) {
+              const pdfBlob = b64toBlob(data.pdfZip, "application/zip");
+              downloadBlob(pdfBlob, "pdfs.zip");
+              log("Arquivos gerados e baixados (DOCX e PDF).");
+            } else {
+              log("DOCX gerados e baixados. PDFs não foram gerados (verifique LibreOffice no servidor).", true);
+            }
+          } else {
+            let msg = `Emails enviados: ${data.sent}, falhas: ${data.failed}`;
+            if (data.errors && data.errors.length) {
+              msg += `\nErros:\n${data.errors.join("\n")}`;
+            }
+            if (data.reportXlsx) {
+              const reportBlob = b64toBlob(
+                data.reportXlsx,
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+              );
+              const reportName = `relatorio_envio_${new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-")}.xlsx`;
+              downloadBlob(reportBlob, reportName);
+              msg += `\nRelatório baixado: ${reportName}`;
+            }
+            log(msg, data.failed > 0);
+          }
+        } catch (err) {
+          log("Falha ao obter resultado.", true);
+        } finally {
+          activeJob = null;
+          hideGenerationOverlay();
+        }
+      }
+
+      async function startJob(endpoint, fd, overlayTitle, overlayText) {
+        if (document.hidden) {
+          log("Volte para esta aba para iniciar o processo.", true);
+          return;
+        }
+        if (activeJob) {
+          log("Já existe um processo em andamento.", true);
+          return;
+        }
+        showGenerationOverlay();
+        setOverlayContent(overlayTitle, overlayText);
+        setProgress(0, 0);
+        setProgressState("Iniciando...");
+        try {
+          const res = await fetch(endpoint, { method: "POST", body: fd });
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok) {
+            hideGenerationOverlay();
+            log(data.error || "Falha ao iniciar processo", true);
+            return;
+          }
+          activeJob = {
+            id: data.jobId,
+            type: endpoint === "/generate-job" ? "generate" : "send",
+          };
+          if (data.total) setProgress(0, data.total);
+          await pollActiveJob();
+          pollTimer = setInterval(pollActiveJob, 900);
+        } catch (err) {
+          hideGenerationOverlay();
+          log("Falha ao iniciar processo", true);
+        }
+      }
+
+      async function pauseActiveJob() {
+        if (!activeJob) return;
+        try {
+          await fetch(`/jobs/${activeJob.id}/pause`, { method: "POST" });
+        } catch (err) {
+          /* noop */
+        }
+      }
+
+      async function resumeActiveJob() {
+        if (!activeJob) return;
+        try {
+          await fetch(`/jobs/${activeJob.id}/resume`, { method: "POST" });
+        } catch (err) {
+          /* noop */
+        }
+      }
+
+      function positionGameTarget() {
+        if (!gameAreaEl || !gameTargetEl) return;
+        const areaRect = gameAreaEl.getBoundingClientRect();
+        const size = gameTargetEl.offsetWidth || 34;
+        const maxX = Math.max(0, areaRect.width - size);
+        const maxY = Math.max(0, areaRect.height - size);
+        const x = Math.random() * maxX;
+        const y = Math.random() * maxY;
+        gameTargetEl.style.left = `${x}px`;
+        gameTargetEl.style.top = `${y}px`;
+      }
+
+      function startMiniGame() {
+        if (!gameAreaEl || !gameTargetEl || !gameScoreEl) return;
+        gameScore = 0;
+        gameScoreEl.textContent = String(gameScore);
+        positionGameTarget();
+        if (gameTimer) clearInterval(gameTimer);
+        gameTimer = setInterval(positionGameTarget, 900);
+      }
+
+      function stopMiniGame() {
+        if (gameTimer) clearInterval(gameTimer);
+        gameTimer = null;
+      }
+
+      function showGenerationOverlay() {
+        if (!overlayEl) return;
+        document.body.classList.add("overlay-active");
+        overlayEl.classList.add("is-visible");
+        overlayEl.setAttribute("aria-hidden", "false");
+        startMiniGame();
+      }
+
+      function hideGenerationOverlay() {
+        if (!overlayEl) return;
+        overlayEl.classList.remove("is-visible");
+        overlayEl.setAttribute("aria-hidden", "true");
+        document.body.classList.remove("overlay-active");
+        stopMiniGame();
+      }
+
+      if (gameTargetEl) {
+        gameTargetEl.addEventListener("click", () => {
+          gameScore += 1;
+          if (gameScoreEl) {
+            gameScoreEl.textContent = String(gameScore);
+          }
+          positionGameTarget();
+        });
+      }
+
+      if (overlayCloseEl) {
+        overlayCloseEl.addEventListener("click", () => {
+          hideGenerationOverlay();
+        });
+      }
+
+      document.addEventListener("visibilitychange", () => {
+        if (!activeJob) return;
+        if (document.hidden) {
+          pauseActiveJob();
+          setProgressState("Pausado. Volte para continuar.");
+          stopMiniGame();
+        } else {
+          resumeActiveJob();
+          if (overlayEl && overlayEl.classList.contains("is-visible")) {
+            startMiniGame();
+          }
+        }
+      });
+
+      window.addEventListener("resize", () => {
+        if (overlayEl && overlayEl.classList.contains("is-visible")) {
+          positionGameTarget();
+        }
+      });
+
+      function renderMapping() {
+        mappingTableBody.innerHTML = "";
+        mapping.forEach((item, idx) => {
+          const tr = document.createElement("tr");
+          const prefix = item.prefix || "";
+          const group = item.group || "";
+          tr.innerHTML = `<td>${item.placeholder}</td><td>${item.column}</td><td>${prefix}</td><td>${group}</td><td><button data-idx="${idx}" title="Remove esta linha da tabela">Remover</button></td>`;
+          mappingTableBody.appendChild(tr);
+        });
+      }
+
+      mappingTableBody.addEventListener("click", (ev) => {
+        if (ev.target.tagName === "BUTTON") {
+          const idx = Number(ev.target.dataset.idx);
+          mapping.splice(idx, 1);
+          renderMapping();
+        }
+      });
+
+      function fillSelect(select, items, wrapBraces = false) {
+        select.innerHTML = "";
+        const optEmpty = document.createElement("option");
+        optEmpty.value = "";
+        optEmpty.textContent = "-- selecione --";
+        select.appendChild(optEmpty);
+        items.forEach((item) => {
+          const opt = document.createElement("option");
+          opt.value = item;
+          opt.textContent = wrapBraces ? `{{${item}}}` : item;
+          select.appendChild(opt);
+        });
+      }
+
+      function updateEmailMode() {
+        smtpConfigEl.style.display = emailModeSelect.value === "smtp" ? "block" : "none";
+        outlookConfigEl.style.display = emailModeSelect.value === "outlook" ? "block" : "none";
+      }
+      emailModeSelect.addEventListener("change", updateEmailMode);
+      updateEmailMode();
+
+      document.getElementById("inspect").addEventListener("click", async () => {
+        const templateFile = document.getElementById("template").files[0];
+        const excelFile = document.getElementById("excel").files[0];
+        if (!templateFile) return log("Envie o template.", true);
+
+        const fd = new FormData();
+        fd.append("template", templateFile);
+        if (excelFile) fd.append("excel", excelFile);
+
+        log("Inspecionando...");
+        const res = await fetch("/inspect", { method: "POST", body: fd });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) return log(data.error || "Falha na inspeção", true);
+        placeholders = data.placeholders || [];
+        columns = data.columns || [];
+        fillSelect(phSelect, placeholders, true);
+        fillSelect(colSelect, columns);
+        fillSelect(document.getElementById("primary-placeholder"), placeholders, true);
+        fillSelect(document.getElementById("email-column"), columns);
+        log(`Encontrados ${placeholders.length} placeholder(s) e ${columns.length} coluna(s).`);
+      });
+
+      document.getElementById("add-mapping").addEventListener("click", () => {
+        const ph = phSelect.value;
+        const col = colSelect.value;
+        if (!ph || !col) return log("Escolha placeholder e coluna.", true);
+        mapping.push({
+          placeholder: ph,
+          column: col,
+          prefix: prefixInput.value || "",
+          group: groupInput.value || "",
+        });
+        renderMapping();
+      });
+
+      document.getElementById("generate").addEventListener("click", async () => {
+        const templateFile = document.getElementById("template").files[0];
+        const excelFile = document.getElementById("excel").files[0];
+        if (!templateFile || !excelFile) return log("Envie template e planilha.", true);
+        if (!mapping.length) return log("Adicione ao menos um mapeamento.", true);
+
+        const fd = new FormData();
+        fd.append("template", templateFile);
+        fd.append("excel", excelFile);
+        fd.append("mapping", JSON.stringify(mapping));
+        fd.append("nameTemplate", document.getElementById("name-template").value);
+        fd.append("primaryPlaceholder", document.getElementById("primary-placeholder").value);
+        fd.append("emailColumn", document.getElementById("email-column").value);
+        fd.append("emailSubject", document.getElementById("email-subject").value);
+        fd.append("emailMessage", document.getElementById("email-message").value);
+        fd.append("emailMode", document.getElementById("email-mode").value);
+        fd.append("smtpHost", document.getElementById("smtp-host").value);
+        fd.append("smtpPort", document.getElementById("smtp-port").value);
+        fd.append("smtpUser", document.getElementById("smtp-user").value);
+        fd.append("smtpPass", document.getElementById("smtp-pass").value);
+        fd.append("smtpFrom", document.getElementById("smtp-from").value);
+        fd.append("smtpSecure", document.getElementById("smtp-secure").checked ? "true" : "");
+        fd.append("outlookFrom", document.getElementById("outlook-from").value);
+
+        log("Iniciando geração...");
+        await startJob(
+          "/generate-job",
+          fd,
+          "Gerando PDF e DOCX...",
+          "Aguarde um momento. Enquanto isso, jogue e marque pontos."
+        );
+      });
+
+      document.getElementById("send-only").addEventListener("click", async () => {
+        const templateFile = document.getElementById("template").files[0];
+        const excelFile = document.getElementById("excel").files[0];
+        if (!templateFile || !excelFile) return log("Envie template e planilha.", true);
+        if (!mapping.length) return log("Adicione ao menos um mapeamento.", true);
+        if (!document.getElementById("email-column").value) return log("Selecione a coluna de email.", true);
+
+        const fd = new FormData();
+        fd.append("template", templateFile);
+        fd.append("excel", excelFile);
+        fd.append("mapping", JSON.stringify(mapping));
+        fd.append("nameTemplate", document.getElementById("name-template").value);
+        fd.append("primaryPlaceholder", document.getElementById("primary-placeholder").value);
+        fd.append("emailColumn", document.getElementById("email-column").value);
+        fd.append("emailSubject", document.getElementById("email-subject").value);
+        fd.append("emailMessage", document.getElementById("email-message").value);
+        fd.append("emailMode", document.getElementById("email-mode").value);
+        fd.append("smtpHost", document.getElementById("smtp-host").value);
+        fd.append("smtpPort", document.getElementById("smtp-port").value);
+        fd.append("smtpUser", document.getElementById("smtp-user").value);
+        fd.append("smtpPass", document.getElementById("smtp-pass").value);
+        fd.append("smtpFrom", document.getElementById("smtp-from").value);
+        fd.append("smtpSecure", document.getElementById("smtp-secure").checked ? "true" : "");
+        fd.append("outlookFrom", document.getElementById("outlook-from").value);
+
+        log("Iniciando envio de emails...");
+        await startJob(
+          "/send-emails-job",
+          fd,
+          "Enviando emails...",
+          "Gerando PDFs e enviando para cada destinatário."
+        );
+      });
+
+      function b64toBlob(b64Data, contentType = "", sliceSize = 512) {
+        const byteCharacters = atob(b64Data || "");
+        const byteArrays = [];
+        for (let offset = 0; offset < byteCharacters.length; offset += sliceSize) {
+          const slice = byteCharacters.slice(offset, offset + sliceSize);
+          const byteNumbers = new Array(slice.length);
+          for (let i = 0; i < slice.length; i++) {
+            byteNumbers[i] = slice.charCodeAt(i);
+          }
+          byteArrays.push(new Uint8Array(byteNumbers));
+        }
+        return new Blob(byteArrays, { type: contentType });
+      }
+
+      function downloadBlob(blob, filename) {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = filename;
+        a.click();
+        URL.revokeObjectURL(url);
+      }
+    </script>
+  </body>
+</html>
