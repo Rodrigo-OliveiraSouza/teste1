@@ -61,7 +61,7 @@ export function initUI() {
     name: ''
   };
 
-  const defaultAuthText = 'Fa?a login com Google para enviar sua ideia.';
+  const defaultAuthText = 'Faca login com Google para enviar sua ideia.';
 
   const setStatus = (kind, message) => {
     status.textContent = formatStatus(kind, message);
@@ -118,13 +118,13 @@ export function initUI() {
   const initGoogle = async () => {
     const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
     if (!clientId) {
-      setAuthUnavailable('Login Google indispon?vel no momento.');
+      setAuthUnavailable('Login Google indisponivel no momento.');
       return;
     }
 
     const googleApi = await waitForGoogle();
     if (!googleApi) {
-      setAuthUnavailable('Login Google indispon?vel no momento.');
+      setAuthUnavailable('Login Google indisponivel no momento.');
       return;
     }
 
@@ -200,7 +200,7 @@ export function initUI() {
     }
 
     if (!auth.idToken) {
-      setStatus('error', 'Fa?a login com Google para enviar a mensagem.');
+      setStatus('error', 'Faca login com Google para enviar a mensagem.');
       return;
     }
 
@@ -240,11 +240,11 @@ export function initUI() {
       } else if (response.status === 429) {
         setStatus('error', 'Limite de envios atingido. Tente mais tarde.');
       } else if (response.status === 403) {
-        setStatus('error', 'Sess?o expirada. Recarregue a p?gina.');
+        setStatus('error', 'Sessao expirada. Recarregue a pagina.');
       } else if (response.status === 401) {
-        setStatus('error', 'Fa?a login com Google novamente.');
+        setStatus('error', 'Faca login com Google novamente.');
       } else {
-        setStatus('error', 'N?o foi poss?vel enviar agora.');
+        setStatus('error', 'Nao foi possivel enviar agora.');
       }
     } catch (error) {
       setStatus('error', 'Falha de rede ao enviar.');
