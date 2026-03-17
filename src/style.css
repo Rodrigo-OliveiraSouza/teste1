@@ -34,9 +34,9 @@ body {
   font-family: "Space Grotesk", "Sora", "IBM Plex Sans", "Segoe UI", sans-serif;
   background-color: var(--bg-1);
   background-image:
-    radial-gradient(900px 620px at 14% -10%, rgba(42, 240, 194, 0.12), transparent 62%),
-    radial-gradient(720px 520px at 88% 2%, rgba(255, 179, 71, 0.08), transparent 58%),
-    linear-gradient(180deg, #05080e 0%, #0a1018 46%, #101927 100%);
+    radial-gradient(860px 600px at 12% 0%, rgba(58, 196, 168, 0.16), transparent 60%),
+    radial-gradient(740px 540px at 86% 8%, rgba(255, 184, 118, 0.12), transparent 58%),
+    linear-gradient(145deg, #05070c 0%, #0b1118 42%, #111b27 100%);
   background-attachment: fixed;
   color: var(--text);
   overflow-x: hidden;
@@ -46,15 +46,19 @@ body::before {
   content: "";
   position: fixed;
   inset: 0;
-  background-image:
-    repeating-linear-gradient(
-      0deg,
-      rgba(255, 255, 255, 0.015) 0,
-      rgba(255, 255, 255, 0.015) 1px,
-      transparent 1px,
-      transparent 140px
-    );
-  opacity: 0.16;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.08), transparent 22%, transparent 76%, rgba(255, 255, 255, 0.04));
+  opacity: 0.08;
+  pointer-events: none;
+  z-index: 1;
+}
+
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(circle at center, transparent 46%, rgba(3, 6, 10, 0.28) 100%);
   pointer-events: none;
   z-index: 1;
 }
@@ -65,8 +69,7 @@ body::before {
   z-index: 0;
   pointer-events: none;
   overflow: hidden;
-  opacity: 0.26;
-  mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0.25));
+  opacity: 0.62;
 }
 
 #matrix-bg canvas {
@@ -105,7 +108,7 @@ a {
   padding: 56px 72px 96px;
   display: flex;
   flex-direction: column;
-  gap: 72px;
+  gap: 84px;
 }
 
 .site-header {
@@ -183,6 +186,7 @@ a {
   align-items: center;
   justify-content: center;
   gap: 8px;
+  box-shadow: 0 14px 28px rgba(42, 240, 194, 0.14);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
@@ -220,16 +224,18 @@ a {
 }
 
 .hero h1 {
-  font-size: clamp(2.6rem, 3.4vw, 4rem);
+  font-size: clamp(3rem, 4.8vw, 5rem);
   margin: 0 0 18px;
-  line-height: 1.1;
+  line-height: 1;
+  max-width: 10ch;
 }
 
 .lead {
-  font-size: 1.05rem;
-  line-height: 1.7;
+  font-size: 1.08rem;
+  line-height: 1.65;
   color: var(--muted);
   margin: 0 0 28px;
+  max-width: 54ch;
 }
 
 .cta-row {
@@ -265,7 +271,8 @@ a {
   padding: 16px 18px;
   border-radius: 18px;
   border: 1px solid rgba(124, 178, 255, 0.12);
-  background: rgba(10, 16, 26, 0.52);
+  background: rgba(10, 16, 26, 0.58);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
 }
 
 .proof-label {
@@ -280,6 +287,13 @@ a {
 .proof-item strong {
   display: block;
   font-size: 0.98rem;
+  line-height: 1.45;
+}
+
+.proof-item p {
+  margin: 8px 0 0;
+  color: var(--muted);
+  font-size: 0.88rem;
   line-height: 1.45;
 }
 
@@ -364,13 +378,13 @@ a {
 
 .section-header h2 {
   margin: 0 0 10px;
-  font-size: 1.6rem;
+  font-size: 1.85rem;
 }
 
 .section-header p {
   margin: 0;
   color: var(--muted);
-  max-width: 680px;
+  max-width: 560px;
   line-height: 1.6;
 }
 
@@ -391,8 +405,9 @@ a {
   border: 1px solid var(--border);
   border-radius: 18px;
   padding: 22px;
-  background: rgba(10, 16, 26, 0.7);
-  transition: transform 0.2s ease, border-color 0.2s ease;
+  background: rgba(10, 16, 26, 0.76);
+  box-shadow: 0 18px 40px rgba(2, 6, 11, 0.28);
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .card h3 {
@@ -409,6 +424,7 @@ a {
 .card:hover {
   transform: translateY(-4px);
   border-color: rgba(42, 240, 194, 0.4);
+  box-shadow: 0 22px 46px rgba(2, 6, 11, 0.34);
 }
 
 .featured-work {
@@ -449,7 +465,7 @@ a {
   align-items: center;
   font-size: 0.78rem;
   text-transform: uppercase;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.12em;
   color: var(--muted);
 }
 
@@ -487,6 +503,7 @@ a {
   gap: 8px;
   font-weight: 600;
   color: var(--text);
+  margin-top: 4px;
 }
 
 .text-link::after {
@@ -518,12 +535,13 @@ a {
 .link-card-image {
   display: block;
   width: 100%;
-  height: clamp(220px, 28vw, 340px);
+  height: clamp(220px, 24vw, 320px);
   object-fit: contain;
   object-position: center;
   border-radius: 12px;
   border: 1px solid rgba(124, 178, 255, 0.22);
   margin-bottom: 14px;
+  padding: 12px;
   background: rgba(7, 12, 18, 0.55);
 }
 
@@ -599,7 +617,7 @@ a {
 }
 
 .info-card {
-  background: rgba(10, 16, 26, 0.7);
+  background: rgba(10, 16, 26, 0.78);
   border: 1px solid var(--border);
   border-radius: 18px;
   padding: 20px 22px;
@@ -636,7 +654,7 @@ a {
 .contact-form {
   display: grid;
   gap: 16px;
-  background: var(--panel);
+  background: rgba(8, 14, 22, 0.82);
   border: 1px solid var(--border);
   border-radius: 18px;
   padding: 24px;
