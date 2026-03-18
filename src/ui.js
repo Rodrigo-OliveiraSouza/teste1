@@ -61,7 +61,7 @@ export function initUI() {
     name: ''
   };
 
-  const defaultAuthText = 'Faca login com Google para enviar seu briefing.';
+  const defaultAuthText = 'Faca login com Google para enviar o projeto.';
 
   const setStatus = (kind, message) => {
     status.textContent = formatStatus(kind, message);
