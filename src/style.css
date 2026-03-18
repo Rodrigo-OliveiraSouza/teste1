@@ -34,9 +34,10 @@ body {
   font-family: "Space Grotesk", "Sora", "IBM Plex Sans", "Segoe UI", sans-serif;
   background-color: var(--bg-1);
   background-image:
-    radial-gradient(860px 600px at 12% 0%, rgba(58, 196, 168, 0.16), transparent 60%),
-    radial-gradient(740px 540px at 86% 8%, rgba(255, 184, 118, 0.12), transparent 58%),
-    linear-gradient(145deg, #05070c 0%, #0b1118 42%, #111b27 100%);
+    radial-gradient(900px 640px at 14% -4%, rgba(112, 178, 255, 0.12), transparent 62%),
+    radial-gradient(720px 520px at 84% 6%, rgba(84, 236, 204, 0.08), transparent 58%),
+    radial-gradient(620px 420px at 50% 110%, rgba(255, 255, 255, 0.035), transparent 60%),
+    linear-gradient(180deg, #05070d 0%, #0a1018 46%, #111928 100%);
   background-attachment: fixed;
   color: var(--text);
   overflow-x: hidden;
@@ -46,9 +47,22 @@ body::before {
   content: "";
   position: fixed;
   inset: 0;
-  background:
-    linear-gradient(135deg, rgba(255, 255, 255, 0.08), transparent 22%, transparent 76%, rgba(255, 255, 255, 0.04));
-  opacity: 0.08;
+  background-image:
+    repeating-linear-gradient(
+      90deg,
+      rgba(151, 190, 255, 0.024) 0,
+      rgba(151, 190, 255, 0.024) 1px,
+      transparent 1px,
+      transparent 180px
+    ),
+    repeating-linear-gradient(
+      0deg,
+      rgba(151, 190, 255, 0.014) 0,
+      rgba(151, 190, 255, 0.014) 1px,
+      transparent 1px,
+      transparent 160px
+    );
+  opacity: 0.14;
   pointer-events: none;
   z-index: 1;
 }
@@ -58,7 +72,8 @@ body::after {
   position: fixed;
   inset: 0;
   background:
-    radial-gradient(circle at center, transparent 46%, rgba(3, 6, 10, 0.28) 100%);
+    linear-gradient(180deg, rgba(5, 7, 13, 0.2), transparent 20%, transparent 72%, rgba(5, 7, 13, 0.28)),
+    radial-gradient(circle at center, transparent 42%, rgba(3, 6, 10, 0.32) 100%);
   pointer-events: none;
   z-index: 1;
 }
@@ -69,7 +84,8 @@ body::after {
   z-index: 0;
   pointer-events: none;
   overflow: hidden;
-  opacity: 0.62;
+  opacity: 0.46;
+  filter: saturate(0.88);
 }
 
 #matrix-bg canvas {
